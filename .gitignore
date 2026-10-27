@@ -1,0 +1,10 @@
+target/
+*.class
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.log
+rushhourdb.mv.db
+savegame.xml
