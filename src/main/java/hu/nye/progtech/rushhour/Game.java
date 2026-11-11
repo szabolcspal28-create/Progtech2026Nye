@@ -1,5 +1,7 @@
 package hu.nye.progtech.rushhour;
 
+import java.util.Scanner;
+
 import hu.nye.progtech.rushhour.model.Board;
 import hu.nye.progtech.rushhour.service.AiService;
 import hu.nye.progtech.rushhour.service.BoardReader;
@@ -10,12 +12,23 @@ import hu.nye.progtech.rushhour.ui.BoardPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Scanner;
-
+/**
+ * A játék fő osztálya, amely a játékmenetet és a ciklust irányítja.
+ */
 public class Game {
-    private static final Logger logger = LoggerFactory.getLogger(Game.class);
+    /**
+     * A naplózó objektum a Game osztályhoz.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
+
+    /**
+     * A mentési fájl neve.
+     */
     private static final String SAVE_FILE = "savegame.xml";
 
+    /**
+     * Elindítja a játékot és kezeli a fő eseményhurkot.
+     */
     public void start() {
         System.out.println("Üdvözöllek a Rush Hour játékban!");
         Scanner scanner = new Scanner(System.in);
@@ -30,45 +43,48 @@ public class Game {
         MoveService moveService = new MoveService();
         AiService aiService = new AiService(moveService);
         DatabaseService dbService = DatabaseService.getInstance();
-        XmlStateService xmlService = new XmlStateService(); // XML Szerviz beállítva
+        XmlStateService xmlService = new XmlStateService();
 
-        logger.info("Játék elindítva: {}", playerName);
+        LOGGER.info("Játék elindítva: {}", playerName);
 
         boolean isRunning = true;
         while (isRunning) {
             printer.printBoard(board);
-            System.out.println("Parancsok: '[jármű] [irány] [lépés]' (pl. 'A jobb 1') | 'mentes' | 'betoltes' | 'kilepes'");
+            System.out.println("Parancsok: '[jármű] [irány] [lépés]' "
+                    + "(pl. 'A jobb 1') | 'mentes' | 'betoltes' | 'kilepes'");
             System.out.print("Kérem a következő parancsot: ");
             String command = scanner.nextLine();
 
-            // Parancsok vizsgálata
-            if (command.equalsIgnoreCase("kilepes")) {
-                System.out.println("Játék befejezése... Viszlát, " + playerName + "!");
+            if ("kilepes".equalsIgnoreCase(command)) {
+                System.out.println("Játék befejezése... Viszlát, "
+                        + playerName + "!");
                 dbService.printLeaderboard();
                 break;
-            } else if (command.equalsIgnoreCase("mentes")) {
+            } else if ("mentes".equalsIgnoreCase(command)) {
                 xmlService.saveGame(board, SAVE_FILE);
                 System.out.println(">>> Játékállás sikeresen elmentve!");
                 continue;
-            } else if (command.equalsIgnoreCase("betoltes")) {
+            } else if ("betoltes".equalsIgnoreCase(command)) {
                 Board loadedBoard = xmlService.loadGame(SAVE_FILE);
                 if (loadedBoard != null) {
                     board = loadedBoard;
                     System.out.println(">>> Játékállás sikeresen betöltve!");
                 } else {
-                    System.out.println(">>> Hiba: Nem található mentett játékállás.");
+                    System.out.println(">>> Hiba: Nem található mentett játék.");
                 }
                 continue;
             }
 
-            // Ha nem a fenti parancsok egyike volt, akkor lépésként értelmezzük
             Board nextBoard = moveService.processMove(board, command);
-            if (nextBoard == board) continue;
+            if (nextBoard == board) {
+                continue;
+            }
             board = nextBoard;
 
             if (checkWinCondition(board, 'A', board.getCols())) {
                 printer.printBoard(board);
-                System.out.println("Gratulálok, " + playerName + "! Kijuttattad a járművet, TE NYERTÉL!");
+                System.out.println("Gratulálok, " + playerName
+                        + "! Kijuttattad a járművet, TE NYERTÉL!");
                 dbService.saveWin(playerName, "Ember");
                 dbService.printLeaderboard();
                 break;
@@ -78,7 +94,8 @@ public class Game {
 
             if (checkWinCondition(board, 'B', 0)) {
                 printer.printBoard(board);
-                System.out.println("Sajnos a gép kivezette a járművét. A GÉP NYERT!");
+                System.out.println("Sajnos a gép kivezette a járművét. "
+                        + "A GÉP NYERT!");
                 dbService.saveWin(playerName, "Gép");
                 dbService.printLeaderboard();
                 break;
@@ -87,12 +104,16 @@ public class Game {
         scanner.close();
     }
 
-    private boolean checkWinCondition(Board board, char targetId, int exitCol) {
+    private boolean checkWinCondition(final Board board, final char targetId,
+                                      final int exitCol) {
         return board.getVehicles().stream()
                 .filter(v -> v.getId() == targetId)
                 .anyMatch(v -> {
-                    if (exitCol == 0 && v.getPosition().getCol() == 0) return true;
-                    return exitCol > 0 && v.getPosition().getCol() + v.getLength() == exitCol;
+                    if (exitCol == 0 && v.getPosition().getCol() == 0) {
+                        return true;
+                    }
+                    return exitCol > 0
+                            && v.getPosition().getCol() + v.getLength() == exitCol;
                 });
     }
 }

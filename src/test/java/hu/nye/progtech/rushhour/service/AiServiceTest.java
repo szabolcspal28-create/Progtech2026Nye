@@ -26,12 +26,15 @@ class AiServiceTest {
         moveServiceMock = Mockito.mock(MoveService.class);
         underTest = new AiService(moveServiceMock);
 
-        Vehicle vehicleB = new Vehicle('B', new Position(0, 0), Orientation.HORIZONTAL, 2);
-        // A Builder mintát kell használnunk a Board létrehozásához, ahogy a kódunkban megírtuk!
+        Vehicle vehicleA = new Vehicle('A', new Position(0, 0), Orientation.HORIZONTAL, 2);
+        Vehicle vehicleB = new Vehicle('B', new Position(2, 2), Orientation.VERTICAL, 2);
+
+        // Kibővítettük a tesztpályát, hogy legyen legalább két jármű (A és B),
+        // így az AI nem lép ki azonnal a "size <= 1" védelem miatt.
         board = new Board.Builder()
                 .withRows(6)
                 .withCols(6)
-                .withVehicles(List.of(vehicleB))
+                .withVehicles(List.of(vehicleA, vehicleB))
                 .build();
     }
 

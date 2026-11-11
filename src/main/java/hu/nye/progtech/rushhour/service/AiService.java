@@ -19,7 +19,7 @@ public class AiService {
     public Board playAiTurn(Board board) {
         List<Vehicle> vehicles = board.getVehicles();
 
-        // Ha csak egy jármű van a pályán, a gép nem lép.
+        // Ha csak egy jármű van a pályán, a gép nem lé.
         if (vehicles.size() <= 1) {
             return board;
         }
