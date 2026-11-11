@@ -17,7 +17,7 @@ class BoardReaderTest {
 
         assertNotNull(board);
         assertEquals(6, board.getRows());
-        assertEquals(6, board.getCols());
+        assertEquals(12, board.getCols());
         assertFalse(board.getVehicles().isEmpty());
     }
 

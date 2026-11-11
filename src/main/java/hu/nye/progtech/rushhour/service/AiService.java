@@ -18,11 +18,23 @@ public class AiService {
 
     public Board playAiTurn(Board board) {
         List<Vehicle> vehicles = board.getVehicles();
-        Board newBoard = board;
 
-        while (newBoard == board) {
+        // Ha csak egy jármű van a pályán, a gép nem lép.
+        if (vehicles.size() <= 1) {
+            return board;
+        }
+
+        Board newBoard = board;
+        int attempts = 0;
+        int maxAttempts = 50;
+
+        while (newBoard == board && attempts < maxAttempts) {
             Vehicle candidate = vehicles.get(random.nextInt(vehicles.size()));
-            if (candidate.getId() == 'A') continue;
+
+            if (candidate.getId() == 'A') {
+                attempts++;
+                continue;
+            }
 
             String dir = candidate.getOrientation() == Orientation.HORIZONTAL
                     ? (random.nextBoolean() ? "bal" : "jobb")
@@ -35,7 +47,13 @@ public class AiService {
             if (newBoard != board) {
                 System.out.println("-> A gépi ellenfél lépése: " + command);
             }
+            attempts++;
         }
+
+        if (newBoard == board) {
+            System.out.println("-> A gép passzol (nem talált érvényes lépést a limiten belül).");
+        }
+
         return newBoard;
     }
 }
